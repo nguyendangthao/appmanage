@@ -1,21 +1,20 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, AppRegistry } from 'react-native';
+import CreateAppContainer from './config/createappcontainer';
+import { Data } from './src/data'
 
 export default class App extends React.Component {
+  componentWillMount() {
+    new Data();
+  }
   render() {
     return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-      </View>
+      <CreateAppContainer />
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+// AppRegistry.registerComponent('appmanage', () => App);
+
+
+
