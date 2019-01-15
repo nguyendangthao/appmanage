@@ -11,18 +11,41 @@ export const Data = function () {
                  Description text,Quantity text,Price text, IsDelete integer,DateCreat text,DateUpdate text);`
         );
     });
-    return null;
 };
 
-export const geta = async function (id) {
-    var a = {};
-    await db.transaction(
-        tx => {
-            tx.executeSql('select * from Category where Id=?;', [id], function (tx, res) {
-                a = res.rows._array;
-            });
-        },
-    )
-    return a;
+class API {
+    thisFunction() {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('select * from Category;', [], function (tx, res) {
+                        resolve(res);
+                    });
+                },
+            )
+        });
+
+    }
+
+    addCategory(model) {
+
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('insert into Category (Name,Description,IsDelete,DateCreat,DateUpdate) values (?,?,?,?,?)',
+                        [model.name, model.description, 0, model.dateCreat, model.dateUpdate], function (tx, res) {
+                            if (res.insertId) {
+                                tx.executeSql('select * from Category where Id=?;', [res.insertId], function (tx, res) {
+                                    resolve(res.rows._array);
+                                })
+                            };
+                        });
+                },
+
+            )
+        });
+    }
 
 }
+export default new API()
+
