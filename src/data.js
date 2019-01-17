@@ -14,12 +14,12 @@ export const Data = function () {
 };
 
 class API {
-    thisFunction() {
+    getAllCategory(page = 1, pageSize = 5) {
         return new Promise(function (resolve, reject) {
             db.transaction(
                 tx => {
-                    tx.executeSql('select * from Category;', [], function (tx, res) {
-                        resolve(res);
+                    tx.executeSql('select * from Category ORDER BY Id DESC LIMIT ?,?;', [(page - 1) * pageSize, pageSize], function (tx, res) {
+                        resolve(res.rows._array);
                     });
                 },
             )
@@ -28,7 +28,6 @@ class API {
     }
 
     addCategory(model) {
-
         return new Promise(function (resolve, reject) {
             db.transaction(
                 tx => {
@@ -40,6 +39,20 @@ class API {
                                 })
                             };
                         });
+                },
+
+            )
+        });
+    }
+
+    deleteCategory(id) {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('delete  from Category where Id=?;', [id], function (tx, res) {
+                        resolve(res.rows._array);
+                    })
+
                 },
 
             )

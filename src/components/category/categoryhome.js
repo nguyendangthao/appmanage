@@ -1,10 +1,10 @@
 import React from 'react';
-import { Text, View, Picker, TouchableOpacity, StyleSheet, TextInput, Alert }
+import { Text, View, Picker, TouchableOpacity, StyleSheet, TextInput, Alert, TouchableWithoutFeedback, Keyboard }
     from 'react-native';
-import DatePicker from 'react-native-datepicker';
-import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements'
+import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 import api from '../../data';
 import Const from '../../const';
+
 class CategoryHome extends React.Component {
     constructor(props) {
         super(props)
@@ -16,6 +16,23 @@ class CategoryHome extends React.Component {
             dateUpdate: ''
         }
     }
+    static navigationOptions = ({ navigation }) => {
+
+        return {
+            title: 'Loại Hàng',
+            headerStyle: {
+                color: 'tomato',
+            },
+            headerRight: (
+                <Text style={{ color: '#00a4db',paddingRight:5 }}
+                    onPress={() => {
+                        navigation.navigate('categoryList');
+                    }}
+                >Danh Sách</Text>
+            ),
+        }
+
+    };
     addNew() {
         api.addCategory(this.state).then(res => {
             this.setState({
@@ -40,34 +57,37 @@ class CategoryHome extends React.Component {
     }
     render() {
         return (
-            <View style={styles.contanir}>
-                <View>
-                    <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
-                    <FormInput onChangeText={(name) => this.setState({ name })} inputStyle={styles.inputStyle}
-                        multiline={true} value={this.state.name} />
-                    <FormValidationMessage>Tên Hàng phải nhập.</FormValidationMessage>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={styles.contanir}>
+                    <View>
+                        <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
+                        <FormInput onChangeText={(name) => this.setState({ name })} inputStyle={styles.inputStyle}
+                            multiline={true} value={this.state.name} />
+                        <FormValidationMessage>Tên Hàng phải nhập.</FormValidationMessage>
+                    </View>
+                    <View style={{ paddingTop: 20 }}>
+                        <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
+                        <FormInput onChangeText={(description) => this.setState({ description })} inputStyle={styles.inputStyle}
+                            multiline={true} value={this.state.description} />
+                    </View>
+                    <Button
+                        large
+                        icon={{ name: 'envira', type: 'font-awesome' }}
+                        title='Thêm Mới'
+                        onPress={() => { this.addNew() }}
+                        style={{ paddingTop: 40, }}
+                        disabled={this.state.name === ''}
+                        buttonStyle={{ backgroundColor: 'green' }}
+                    />
+                    <Button
+                        large
+                        icon={{ name: 'refresh', type: 'font-awesome' }}
+                        title='Làm Mới'
+                        onPress={() => { this.reset() }}
+                        style={{ paddingTop: 40 }}
+                    />
                 </View>
-                <View style={{ paddingTop: 20 }}>
-                    <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
-                    <FormInput onChangeText={(description) => this.setState({ description })} inputStyle={styles.inputStyle}
-                        multiline={true} value={this.state.description} />
-                </View>
-                <Button
-                    large
-                    icon={{ name: 'envira', type: 'font-awesome' }}
-                    title='Thêm Mới'
-                    onPress={() => { this.addNew() }}
-                    style={{ paddingTop: 40 }}
-                    disabled={this.state.name === ''}
-                />
-                <Button
-                    large
-                    icon={{ name: 'envira', type: 'cached' }}
-                    title='Làm Mới'
-                    onPress={() => { this.reset() }}
-                    style={{ paddingTop: 40 }}
-                />
-            </View>
+            </TouchableWithoutFeedback>
         );
     }
 }
