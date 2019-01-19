@@ -9,50 +9,71 @@ class CategoryHome extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            id: 0,
-            name: '',
-            description: '',
-            dateCreat: Const.formatDate(new Date()),
-            dateUpdate: ''
+            Id: 0,
+            Name: '',
+            Description: '',
+            DateCreat: Const.formatDate(new Date()),
+            DateUpdate: ''
         }
     }
     static navigationOptions = ({ navigation }) => {
-
         return {
             title: 'Loại Hàng',
             headerStyle: {
                 color: 'tomato',
             },
             headerRight: (
-                <Text style={{ color: '#00a4db',paddingRight:5 }}
+                <Text style={{ color: '#00a4db', paddingRight: 5 }}
                     onPress={() => {
                         navigation.navigate('categoryList');
                     }}
                 >Danh Sách</Text>
             ),
         }
-
-    };
-    addNew() {
-        api.addCategory(this.state).then(res => {
+    }
+    componentWillReceiveProps(nextProps) {
+        var item = nextProps.navigation.getParam('item');
+        if (item) {
             this.setState({
-                id: res[0].id,
-                name: res[0].name,
-                description: res[0].description,
-                dateCreat: res[0].dateCreat,
-                dateUpdate: res[0].dateUpdate,
-            });
-            Alert.alert('Thêm mới thành công!');
+                Id: item.Id,
+                Name: item.Name,
+                Description: item.Description,
+                DateCreat: item.DateCreat,
+                DateUpdate: Const.formatDate(new Date()),
+            })
+        }
+    }
+    addNewUpdate() {
+        if (!this.state.Id) {
+            api.addCategory(this.state).then(res => {
+                this.setState({
+                    Id: res[0].Id,
+                    Name: res[0].Name,
+                    Description: res[0].Description,
+                    DateCreat: res[0].DateCreat,
+                    DateUpdate: res[0].DateUpdate,
+                });
+                Alert.alert('Thêm mới thành công!');
+            })
+            return;
+        }
+        this.setState({
+            DateUpdate: Const.formatDate(new Date()),
+        });
+        api.UpdateCategory(this.state).then(res => {
+            if (res) Alert.alert('Sửa lại thành công!');
+            else Alert.alert('Sửa lại không thành công!');
         })
+
 
     }
     reset() {
         this.setState({
-            id: 0,
-            name: '',
-            description: '',
-            dateCreat: Const.formatDate(new Date()),
-            dateUpdate: '',
+            Id: 0,
+            Name: '',
+            Description: '',
+            DateCreat: Const.formatDate(new Date()),
+            DateUpdate: '',
         });
     }
     render() {
@@ -61,22 +82,22 @@ class CategoryHome extends React.Component {
                 <View style={styles.contanir}>
                     <View>
                         <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
-                        <FormInput onChangeText={(name) => this.setState({ name })} inputStyle={styles.inputStyle}
-                            multiline={true} value={this.state.name} />
+                        <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
+                            multiline={true} value={this.state.Name} />
                         <FormValidationMessage>Tên Hàng phải nhập.</FormValidationMessage>
                     </View>
                     <View style={{ paddingTop: 20 }}>
                         <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
-                        <FormInput onChangeText={(description) => this.setState({ description })} inputStyle={styles.inputStyle}
-                            multiline={true} value={this.state.description} />
+                        <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
+                            multiline={true} value={this.state.Description} />
                     </View>
                     <Button
                         large
                         icon={{ name: 'envira', type: 'font-awesome' }}
-                        title='Thêm Mới'
-                        onPress={() => { this.addNew() }}
+                        title={!this.state.Id === true ? 'Thêm Mới' : 'Sửa Lại'}
+                        onPress={() => { this.addNewUpdate() }}
                         style={{ paddingTop: 40, }}
-                        disabled={this.state.name === ''}
+                        disabled={this.state.Name === ''}
                         buttonStyle={{ backgroundColor: 'green' }}
                     />
                     <Button

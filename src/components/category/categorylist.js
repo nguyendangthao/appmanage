@@ -16,13 +16,12 @@ class CategoryList extends React.Component {
             refreshing: false,// hiểu kiểu như cái loading trên web,vào k load get data thì true là đang load,get xong là false
             page: 1,
             pageSize: 20,
-            dataTemp: []
         }
     }
     static navigationOptions = ({ navigation }) => {
 
         return {
-            title: 'Danh Sach Loại Hàng',
+            title: 'Danh Sách Loại Hàng',
             headerLeft: (<Text style={{ color: '#00a4db', paddingLeft: 5 }}
                 onPress={() => {
                     navigation.navigate('categoryHome');
@@ -35,15 +34,17 @@ class CategoryList extends React.Component {
     componentWillMount() {
         api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
             let newPage = this.state.page + 1;
-
-            this.setState({ data: res, page: newPage, dataTemp: res });
+            this.setState({ data: res, page: newPage });
         })
     }
     _onRefresh = () => {
         this.setState({ refreshing: true });
         api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
             if (res.length === 0) {
-                this.setState({ data: this.state.dataTemp, refreshing: false });
+                this.setState({ page: 1, pageSize: this.state.pageSize * 2 });
+                api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+                    this.setState({ data: res, refreshing: false, page: this.state.page + 1 });
+                })
                 return;
             }
             let newPage = this.state.page + 1;
@@ -51,7 +52,6 @@ class CategoryList extends React.Component {
                 data: res,
                 refreshing: false,
                 page: newPage,
-                dataTemp: [...this.state.dataTemp, ...res]
             });
 
         })
@@ -59,9 +59,12 @@ class CategoryList extends React.Component {
     comfirmDelete(id) {
         api.deleteCategory(id).then(res => {
             if (res.length == 0) {
-                api.getAllCategory(this.state.page - 1, this.state.pageSize).then(res => {
+                this.setState({ page: this.state.page - 1 });
+                api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
                     let newPage = this.state.page + 1;
-                    this.setState({ data: res, page: newPage, dataTemp: res });
+                    this.setState({
+                        data: res, page: newPage,
+                    });
                 })
             }
         })
@@ -71,28 +74,14 @@ class CategoryList extends React.Component {
             'Thông Báo',
             'Xác nhận xóa',
             [
-                { text: 'OK', onPress: this.comfirmDelete.bind(this, id) },
-                { text: 'Cancel', style: 'cancel' },
+                { text: 'Đồng Ý', onPress: this.comfirmDelete.bind(this, id) },
+                { text: 'Bỏ', style: 'cancel' },
             ],
             { cancelable: false },
         )
     }
-
     render() {
-        const swipeoutBtnRight = [
-            {
-                text: 'Xóa',
-                backgroundColor: 'red',
-                onPress: (item) => { this.delete(item) }
-            }
-        ];
-        const swipeoutBtnLeft = [
-            {
-                text: 'Chi Tiết',
-                backgroundColor: 'green',
-                onPress: () => { this.delete(item) }
-            }
-        ];
+
         return (
             <ScrollView style={styles.contanir}
                 refreshControl={
@@ -108,20 +97,34 @@ class CategoryList extends React.Component {
                         keyExtractor={(item) => item.Id.toString()}
                         renderItem={
                             ({ item, index }) =>
-                                <Swipeout right={[
-                                    {
-                                        text: 'Xóa',
-                                        backgroundColor: 'red',
-                                        onPress: () => { this.delete(item.Id) }
-                                    }
-                                ]} autoClose={true}
-                                    left={swipeoutBtnLeft}
+                                <Swipeout
+                                    right={[
+                                        {
+                                            text: 'Xóa',
+                                            backgroundColor: 'red',
+                                            onPress: () => { this.delete(item.Id) }
+                                        },
+                                    ]}
+                                    left={[
+                                        {
+                                            text: 'Chi Tiết',
+                                            backgroundColor: 'green',
+                                            onPress: () => { this.props.navigation.navigate('categoryHome', { item: item }); }
+                                        }
+                                    ]}
+                                    autoClose={true}
                                     style={[styles.swipeout, index == this.state.data.length - 1 && { marginBottom: 20 }]}
                                 >
-                                    <ListItem
-                                        title={item.Name}
-                                        subtitle={item.Id}
-                                    />
+                                    <View style={{ height: 100 }}>
+                                        <View style={{ flex: 1, flexDirection: 'row', }}>
+                                            <Text style={{ flex: 0.6, fontSize: 20, color: 'green', paddingLeft: 5, }}>{item.Name}</Text>
+                                            <Text style={{ flex: 0.4, fontSize: 20, position: 'absolute', right: 0, }}>
+                                                {item.DateUpdate || item.DateCreat}
+                                            </Text>
+                                        </View>
+                                        <Text style={{ flex: 1, paddingLeft: 5 }}>{item.Description}</Text>
+
+                                    </View>
                                 </Swipeout>
                         }
                     />
@@ -145,4 +148,25 @@ const styles = StyleSheet.create({
     },
 
 });
+
+{/* <ListItem
+title={item.Name}
+ subtitle={item.Description}
+ containerStyle={{ height: 100 }}
+component={() => {
+    return (
+        <View style={{ height: 100 }}>
+            <View>
+                <Text>{item.Name}</Text>
+                <Text>{item.DateCreat}</Text>
+            </View>
+            <View>
+                <Text>{item.Description}</Text>
+            </View>
+
+        </View>
+    );
+}
+}
+/> */}
 

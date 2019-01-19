@@ -14,13 +14,21 @@ export const Data = function () {
 };
 
 class API {
-    getAllCategory(page = 1, pageSize = 5) {
+    getAllCategory(page = 0, pageSize = 0) {
         return new Promise(function (resolve, reject) {
             db.transaction(
                 tx => {
-                    tx.executeSql('select * from Category ORDER BY Id DESC LIMIT ?,?;', [(page - 1) * pageSize, pageSize], function (tx, res) {
-                        resolve(res.rows._array);
-                    });
+                    if (page === 0 && pageSize === 0) {
+                        tx.executeSql('select * from Category ORDER BY Id DESC', [], function (tx, res) {
+                            resolve(res.rows._array);
+                        });
+                    }
+                    else {
+                        tx.executeSql('select * from Category ORDER BY Id DESC LIMIT ?,?;', [(page - 1) * pageSize, pageSize], function (tx, res) {
+                            resolve(res.rows._array);
+                        });
+                    }
+
                 },
             )
         });
@@ -32,7 +40,7 @@ class API {
             db.transaction(
                 tx => {
                     tx.executeSql('insert into Category (Name,Description,IsDelete,DateCreat,DateUpdate) values (?,?,?,?,?)',
-                        [model.name, model.description, 0, model.dateCreat, model.dateUpdate], function (tx, res) {
+                        [model.Name, model.Description, 0, model.DateCreat, model.DateUpdate], function (tx, res) {
                             if (res.insertId) {
                                 tx.executeSql('select * from Category where Id=?;', [res.insertId], function (tx, res) {
                                     resolve(res.rows._array);
@@ -58,6 +66,26 @@ class API {
             )
         });
     }
+
+    UpdateCategory(model) {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('update Category set Name=?,Description=?,DateUpdate=? where Id=?;)',
+                        [model.Name, model.Description, model.DateUpdate, model.Id], function (tx, res) {
+                            var resuft;
+                            if (!res.insertId)
+                                resuft = true;
+                            else
+                                resuft = false;
+                            resolve(resuft);
+                        });
+                },
+
+            )
+        });
+    }
+
 
 }
 export default new API()
