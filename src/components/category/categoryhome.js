@@ -16,7 +16,9 @@ class CategoryHome extends React.Component {
             DateUpdate: ''
         }
     }
+
     static navigationOptions = ({ navigation }) => {
+        Keyboard.dismiss;
         return {
             title: 'Loại Hàng',
             headerStyle: {
@@ -31,6 +33,7 @@ class CategoryHome extends React.Component {
             ),
         }
     }
+
     componentWillReceiveProps(nextProps) {
         var item = nextProps.navigation.getParam('item');
         if (item) {
@@ -43,6 +46,19 @@ class CategoryHome extends React.Component {
             })
         }
     }
+
+    confirmAddNewUpdate() {
+        Alert.alert(
+            'Thông Báo',
+            'Xác nhận lưu',
+            [
+                { text: 'Đồng Ý', onPress: this.addNewUpdate.bind(this) },
+                { text: 'Bỏ', style: 'cancel' },
+            ],
+            { cancelable: false },
+        )
+    }
+
     addNewUpdate() {
         if (!this.state.Id) {
             api.addCategory(this.state).then(res => {
@@ -53,7 +69,7 @@ class CategoryHome extends React.Component {
                     DateCreat: res[0].DateCreat,
                     DateUpdate: res[0].DateUpdate,
                 });
-                Alert.alert('Thêm mới thành công!');
+                Alert.alert('Thêm mới thành công');
             })
             return;
         }
@@ -61,12 +77,23 @@ class CategoryHome extends React.Component {
             DateUpdate: Const.formatDate(new Date()),
         });
         api.UpdateCategory(this.state).then(res => {
-            if (res) Alert.alert('Sửa lại thành công!');
-            else Alert.alert('Sửa lại không thành công!');
+            if (res) Alert.alert('Sửa lại thành công');
+            else Alert.alert('Sửa lại không thành công');
         })
-
-
     }
+
+    confirmReset() {
+        Alert.alert(
+            'Thông Báo',
+            'Xác nhận làm mới',
+            [
+                { text: 'Đồng Ý', onPress: this.reset.bind(this) },
+                { text: 'Bỏ', style: 'cancel' },
+            ],
+            { cancelable: false },
+        )
+    }
+
     reset() {
         this.setState({
             Id: 0,
@@ -76,15 +103,16 @@ class CategoryHome extends React.Component {
             DateUpdate: '',
         });
     }
+
     render() {
         return (
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View style={styles.contanir}>
+                <View style={styles.contanir} onPress={Keyboard.dismiss}>
                     <View>
                         <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
                         <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
                             multiline={true} value={this.state.Name} />
-                        <FormValidationMessage>Tên Hàng phải nhập.</FormValidationMessage>
+                        <FormValidationMessage>Tên hàng phải nhập</FormValidationMessage>
                     </View>
                     <View style={{ paddingTop: 20 }}>
                         <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
@@ -95,7 +123,7 @@ class CategoryHome extends React.Component {
                         large
                         icon={{ name: 'envira', type: 'font-awesome' }}
                         title={!this.state.Id === true ? 'Thêm Mới' : 'Sửa Lại'}
-                        onPress={() => { this.addNewUpdate() }}
+                        onPress={() => this.confirmAddNewUpdate()}
                         style={{ paddingTop: 40, }}
                         disabled={this.state.Name === ''}
                         buttonStyle={{ backgroundColor: 'green' }}
@@ -104,7 +132,7 @@ class CategoryHome extends React.Component {
                         large
                         icon={{ name: 'refresh', type: 'font-awesome' }}
                         title='Làm Mới'
-                        onPress={() => { this.reset() }}
+                        onPress={this.confirmReset.bind(this)}
                         style={{ paddingTop: 40 }}
                     />
                 </View>

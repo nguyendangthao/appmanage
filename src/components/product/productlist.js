@@ -8,7 +8,7 @@ import api from '../../data';
 import Const from '../../const';
 import Swipeout from 'react-native-swipeout';
 
-class CategoryList extends React.Component {
+class ProductList extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -18,32 +18,31 @@ class CategoryList extends React.Component {
             pageSize: 20,
         }
     }
-
     static navigationOptions = ({ navigation }) => {
+
         return {
-            title: 'Danh Sách Loại Hàng',
+            title: 'Danh Sách Sản Phẩm',
             headerLeft: (<Text style={{ color: '#00a4db', paddingLeft: 5 }}
                 onPress={() => {
-                    navigation.navigate('categoryHome');
+                    navigation.navigate('productHome');
                 }}
-            >Loại Hàng</Text>),
+            >Sản Phẩm</Text>),
+
         }
 
     };
-
     componentWillMount() {
-        api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+        api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
             let newPage = this.state.page + 1;
             this.setState({ data: res, page: newPage });
         })
     }
-
     _onRefresh = () => {
         this.setState({ refreshing: true });
-        api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+        api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
             if (res.length === 0) {
                 this.setState({ page: 1, pageSize: this.state.pageSize * 2 });
-                api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+                api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
                     this.setState({ data: res, refreshing: false, page: this.state.page + 1 });
                 })
                 return;
@@ -57,12 +56,11 @@ class CategoryList extends React.Component {
 
         })
     }
-
     comfirmDelete(id) {
-        api.deleteCategory(id).then(res => {
+        api.deleteProduct(id).then(res => {
             if (res.length == 0) {
                 this.setState({ page: this.state.page - 1 });
-                api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+                api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
                     let newPage = this.state.page + 1;
                     this.setState({
                         data: res, page: newPage,
@@ -71,7 +69,6 @@ class CategoryList extends React.Component {
             }
         })
     }
-
     delete(id) {
         Alert.alert(
             'Thông Báo',
@@ -83,7 +80,6 @@ class CategoryList extends React.Component {
             { cancelable: false },
         )
     }
-
     render() {
         return (
             <ScrollView style={styles.contanir}
@@ -112,7 +108,7 @@ class CategoryList extends React.Component {
                                         {
                                             text: 'Chi Tiết',
                                             backgroundColor: 'green',
-                                            onPress: () => { this.props.navigation.navigate('categoryHome', { item: item }); }
+                                            onPress: () => { this.props.navigation.navigate('productHome', { item: item }); }
                                         }
                                     ]}
                                     autoClose={true}
@@ -125,7 +121,7 @@ class CategoryList extends React.Component {
                                                 {!item.DateUpdate === false ? item.DateUpdate + '-S' : item.DateCreat + '-M'}
                                             </Text>
                                         </View>
-                                        <Text style={{ flex: 1, paddingLeft: 5 }}>{item.Description}</Text>
+                                        <Text style={{ flex: 1, paddingLeft: 5 }}>Số Lượng: {item.Quantity}. --- Giá: {item.Price}.</Text>
 
                                     </View>
                                 </Swipeout>
@@ -137,7 +133,7 @@ class CategoryList extends React.Component {
         );
     }
 }
-export default CategoryList
+export default ProductList
 
 const styles = StyleSheet.create({
     contanir: {
@@ -152,24 +148,5 @@ const styles = StyleSheet.create({
 
 });
 
-{/* <ListItem
-title={item.Name}
- subtitle={item.Description}
- containerStyle={{ height: 100 }}
-component={() => {
-    return (
-        <View style={{ height: 100 }}>
-            <View>
-                <Text>{item.Name}</Text>
-                <Text>{item.DateCreat}</Text>
-            </View>
-            <View>
-                <Text>{item.Description}</Text>
-            </View>
 
-        </View>
-    );
-}
-}
-/> */}
 

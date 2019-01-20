@@ -14,6 +14,9 @@ export const Data = function () {
 };
 
 class API {
+
+    // Category
+
     getAllCategory(page = 0, pageSize = 0) {
         return new Promise(function (resolve, reject) {
             db.transaction(
@@ -73,6 +76,101 @@ class API {
                 tx => {
                     tx.executeSql('update Category set Name=?,Description=?,DateUpdate=? where Id=?;)',
                         [model.Name, model.Description, model.DateUpdate, model.Id], function (tx, res) {
+                            var resuft;
+                            if (!res.insertId)
+                                resuft = true;
+                            else
+                                resuft = false;
+                            resolve(resuft);
+                        });
+                },
+
+            )
+        });
+    }
+
+
+    // Product
+    getAllProduct(page = 0, pageSize = 0) {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    if (page === 0 && pageSize === 0) {
+                        tx.executeSql('select * from Product ORDER BY Id DESC', [], function (tx, res) {
+                            resolve(res.rows._array);
+                        });
+                    }
+                    else {
+                        tx.executeSql('select * from Product ORDER BY Id DESC LIMIT ?,?;', [(page - 1) * pageSize, pageSize], function (tx, res) {
+                            resolve(res.rows._array);
+                        });
+                    }
+
+                },
+            )
+        });
+
+    }
+
+    addProduct(model) {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('insert into Product (CategoryId,Name,Description,Quantity,Price,IsDelete,DateCreat,DateUpdate) values (?,?,?,?,?,?,?,?)',
+                        [model.CategoryId, model.Name, model.Description, model.Quantity, model.Price, 0, model.DateCreat, model.DateUpdate], function (tx, res) {
+                            if (res.insertId) {
+                                tx.executeSql('select * from Product where Id=?;', [res.insertId], function (tx, res) {
+                                    resolve(res.rows._array);
+                                })
+                            };
+                        });
+                },
+
+            )
+        });
+    }
+
+    deleteProduct(id) {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('delete from Product where Id=?;', [id], function (tx, res) {
+                        resolve(res.rows._array);
+                    })
+
+                },
+
+            )
+        });
+    }
+
+    updateproduct(model) {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('update Product set CategoryId=?, Name=?,Quantity=?,Price=?,Description=?,DateUpdate=? where Id=?;)',
+                        [model.CategoryId, model.Name, model.Quantity, model.Price, model.Description, model.DateUpdate, model.Id], function (tx, res) {
+                            var resuft;
+                            if (!res.insertId)
+                                resuft = true;
+                            else
+                                resuft = false;
+                            resolve(resuft);
+                        });
+                },
+
+            )
+        });
+    }
+
+    //search
+
+    searchCategory() {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('update Product set CategoryId=?, Name=?,Quantity=?,Price=?,Description=?,DateUpdate=? where Id=?;)',
+                        [model.CategoryId, model.Name, model.Quantity, model.Price, model.Description, model.DateUpdate, model.Id], function (tx, res) {
                             var resuft;
                             if (!res.insertId)
                                 resuft = true;

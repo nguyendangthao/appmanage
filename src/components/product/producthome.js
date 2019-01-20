@@ -1,5 +1,8 @@
 import React from 'react';
-import { Text, View, Picker, TouchableOpacity, StyleSheet, TextInput, Alert, TouchableWithoutFeedback, Keyboard }
+import {
+    Text, View, Picker, TouchableOpacity, StyleSheet, TextInput, Alert, TouchableWithoutFeedback, Keyboard,
+    ScrollView
+}
     from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 import api from '../../data';
@@ -17,10 +20,13 @@ class ProductHome extends React.Component {
             Price: '',
             DateCreat: Const.formatDate(new Date()),
             DateUpdate: '',
-            dataCategory: []
+            dataCategory: [],
+            CategoryName: ''
         }
+        this.getAllCategory = this.getAllCategory.bind(this);
     }
     static navigationOptions = ({ navigation }) => {
+        Keyboard.dismiss;
         return {
             title: 'Sản Phẩm',
             headerStyle: {
@@ -29,7 +35,7 @@ class ProductHome extends React.Component {
             headerRight: (
                 <Text style={{ color: '#00a4db', paddingRight: 5 }}
                     onPress={() => {
-                        navigation.navigate('categoryList');
+                        navigation.navigate('productList');
                     }}
                 >Danh Sách</Text>
             ),
@@ -37,177 +43,192 @@ class ProductHome extends React.Component {
     }
 
     componentWillMount() {
+        this.getAllCategory();
+    }
+    componentWillUpdate() {
+        this.getAllCategory();
+    }
+    getAllCategory() {
         api.getAllCategory().then(res => {
-            this.setState({ dataCategory: res, CategoryId: res[0].Id });
-        })
+            res.map((item) => {
+                item['value'] = item.Name;
+            })
+            this.setState({
+                dataCategory: res,
+                CategoryId: res.length > 0 ? res[0].Id : 0,
+                CategoryName: res.length > 0 ? res[0].Name : 0,
+            });
+        });
     }
     componentWillReceiveProps(nextProps) {
         var item = nextProps.navigation.getParam('item');
         if (item) {
             this.setState({
                 Id: item.Id,
+                CategoryId: item.CategoryId,
                 Name: item.Name,
+                Quantity: item.Quantity,
+                Price: item.Price,
                 Description: item.Description,
                 DateCreat: item.DateCreat,
                 DateUpdate: Const.formatDate(new Date()),
             })
         }
     }
-    addNewUpdate() {
-        if (!this.state.Id) {
-            api.addCategory(this.state).then(res => {
-                this.setState({
-                    Id: res[0].Id,
-                    Name: res[0].Name,
-                    Description: res[0].Description,
-                    DateCreat: res[0].DateCreat,
-                    DateUpdate: res[0].DateUpdate,
-                });
-                Alert.alert('Thêm mới thành công!');
-            })
-            return;
+
+    confirmAddNew() {
+        Alert.alert(
+            'Thông Báo',
+            'Xác nhận thêm mới',
+            [
+                { text: 'Đồng Ý', onPress: this.addNew.bind(this) },
+                { text: 'Bỏ', style: 'cancel' },
+            ],
+            { cancelable: false },
+        )
+    }
+    addNew() {
+        if (!!this.state.Id) {
+            this.setState({
+                Id: 0,
+                DateCreat: Const.formatDate(new Date()),
+                DateUpdate: '',
+            });
         }
+        api.addProduct(this.state).then(res => {
+            this.setState({
+                Id: res[0].Id,
+                CategoryId: res[0].CategoryId,
+                Name: res[0].Name,
+                Quantity: res[0].Quantity,
+                Price: res[0].Price,
+                Description: res[0].Description,
+                DateCreat: res[0].DateCreat,
+                DateUpdate: res[0].DateUpdate,
+            });
+            Alert.alert('Thêm mới thành công');
+        })
+
+    }
+
+    confirmUpdate() {
+        Alert.alert(
+            'Thông Báo',
+            'Xác nhận sửa lại',
+            [
+                { text: 'Đồng Ý', onPress: this.update.bind(this) },
+                { text: 'Bỏ', style: 'cancel' },
+            ],
+            { cancelable: false },
+        )
+    }
+    update() {
         this.setState({
             DateUpdate: Const.formatDate(new Date()),
         });
-        api.UpdateCategory(this.state).then(res => {
-            if (res) Alert.alert('Sửa lại thành công!');
-            else Alert.alert('Sửa lại không thành công!');
+        api.updateproduct(this.state).then(res => {
+            if (res) Alert.alert('Sửa lại thành công');
+            else Alert.alert('Sửa lại không thành công');
         })
-
-
+    }
+    confirmReset() {
+        Alert.alert(
+            'Thông Báo',
+            'Xác nhận làm mới',
+            [
+                { text: 'Đồng Ý', onPress: this.reset.bind(this) },
+                { text: 'Bỏ', style: 'cancel' },
+            ],
+            { cancelable: false },
+        )
     }
     reset() {
         this.setState({
             Id: 0,
+            CategoryId: this.state.dataCategory[0].Id,
             Name: '',
+            Quantity: '',
+            Price: '',
             Description: '',
             DateCreat: Const.formatDate(new Date()),
             DateUpdate: '',
+            CategoryName: this.state.dataCategory[0].Name
         });
+
     }
     selectedItem = (value, index, data) => {
-        debugger
         let id = data[index].Id;
-        this.setState({ CategoryId: id });
+        this.setState({ CategoryId: id, CategoryName: value });
     }
-
-    selectedItem1(item) {
-    }
-    selectedIndex(){
-
+    changePrice(Price) {
+        this.setState({ Price: Price });
     }
     render() {
-        let data = [{
-            value: 'Banana',
-            text: '1'
-        }, {
-            value: 'Mango',
-            text: '2'
-        }, {
-            value: 'Pear',
-            text: '3'
-        }, {
-            value: 'Banana',
-            text: '1'
-        }, {
-            value: 'Mango',
-            text: '2'
-        }, {
-            value: 'Pear',
-            text: '3'
-        }, {
-            value: 'Banana',
-            text: '1'
-        }, {
-            value: 'Mango',
-            text: '2'
-        }, {
-            value: 'Pear',
-            text: '3'
-        }, {
-            value: 'Banana',
-            text: '1'
-        }, {
-            value: 'Mango',
-            text: '2'
-        }, {
-            value: 'Pear',
-            text: '3'
-        }, {
-            value: 'Banana',
-            text: '1'
-        }, {
-            value: 'Mango',
-            text: '2'
-        }, {
-            value: 'Pear',
-            text: '3'
-        }];
         return (
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View style={styles.contanir}>
 
-                    <FormLabel labelStyle={styles.labelStyle}>Loại Hàng</FormLabel>
-                    <Dropdown
-                        // label='Loại Hàng'
-                        // labelFontSize={25}
-                        data={data}
-                        value={this.state.CategoryId}
-                        onChangeText={this.selectedIndex}
-                        // selectedItemColor='tomato'
-                        // itemTextStyle={{ color: 'gray', fontSize: 20 }}
-
-
-                        // baseColor='tomato'
-                        // textColor='blue'
-                        // itemColor='violet'
-                        // selectedItemColor='#adc290'
-                        // itemTextStyle={{ fontSize: 20 }}
-                        containerStyle={{ marginLeft: '5%', marginRight: '5%', paddingTop:0,marginTop:0 }}
-                    />
-                    {/* <View>
-                        <Picker
-                            itemStyle={{ color: 'red', }}
-                            mode="dropdown"
-                            selectedValue={this.state.CategoryId}
-                            style={{ height: 50, width: 100, color: 'red', }}
-                            onValueChange={(itemValue, itemIndex) => this.setState({ CategoryId: itemValue })}
-                        >
-                            {this.state.dataCategory.map((item, index) => {
-                                return (< Picker.Item label={item.Name} value={item.Id} key={index} />);
-                            })}
-                        </Picker>
-                    </View> */}
-
-                    <View>
-                        <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
-                        <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
-                            multiline={true} value={this.state.Name} />
-                        <FormValidationMessage>Tên Hàng phải nhập.</FormValidationMessage>
+                <ScrollView>
+                    <View style={styles.contanir} onPress={Keyboard.dismiss}>
+                        <FormLabel labelStyle={styles.labelStyle}>Loại Hàng</FormLabel>
+                        <Dropdown
+                            data={this.state.dataCategory}
+                            onChangeText={this.selectedItem}
+                            value={this.state.CategoryName}
+                            selectedItemColor='tomato'
+                            containerStyle={{ marginLeft: '5%', marginRight: '5%' }}
+                        />
+                        <View style={{ paddingTop: 10 }}>
+                            <FormLabel labelStyle={styles.labelStyle}>Tên Sản Phẩm</FormLabel>
+                            <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
+                                multiline={true} value={this.state.Name} />
+                            <FormValidationMessage>Tên sản phẩm phải nhập</FormValidationMessage>
+                        </View>
+                        <View style={{ paddingTop: 10 }}>
+                            <FormLabel labelStyle={styles.labelStyle}>Số Lượng</FormLabel>
+                            <FormInput onChangeText={(Quantity) => this.setState({ Quantity })} inputStyle={styles.inputStyle}
+                                multiline={true} value={this.state.Quantity} keyboardType='numeric' />
+                            <FormValidationMessage>Số lượng phải nhâp</FormValidationMessage>
+                        </View>
+                        <View style={{ paddingTop: 10 }}>
+                            <FormLabel labelStyle={styles.labelStyle}>Giá</FormLabel>
+                            <FormInput onChangeText={(Price) => this.changePrice(Price)} inputStyle={styles.inputStyle}
+                                multiline={true} value={this.state.Price} keyboardType='numeric' />
+                            <FormValidationMessage>Giá phải nhập</FormValidationMessage>
+                        </View>
+                        <View style={{ paddingTop: 10 }}>
+                            <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
+                            <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
+                                multiline={true} value={this.state.Description} />
+                        </View>
+                        <Button
+                            large
+                            icon={{ name: 'envira', type: 'font-awesome' }}
+                            title='Thêm Mới'
+                            onPress={this.confirmAddNew.bind(this)}
+                            style={{ paddingTop: 40, }}
+                            disabled={!this.state.Name || !this.state.Quantity || !this.state.Price}
+                            buttonStyle={{ backgroundColor: 'green' }}
+                        />
+                        {this.state.Id !== 0 &&
+                            <Button
+                                large
+                                icon={{ name: 'envira', type: 'font-awesome' }}
+                                title='Sửa Lại'
+                                onPress={this.confirmUpdate.bind(this)}
+                                style={{ paddingTop: 40, }}
+                                disabled={!this.state.Name || !this.state.Quantity || !this.state.Price}
+                                buttonStyle={{ backgroundColor: '#90c7e7' }}
+                            />
+                        }
+                        <Button
+                            large
+                            icon={{ name: 'refresh', type: 'font-awesome' }}
+                            title='Làm Mới'
+                            onPress={this.confirmReset.bind(this)}
+                            style={{ paddingTop: 40, paddingBottom: 40 }}
+                        />
                     </View>
-                    <View style={{ paddingTop: 20 }}>
-                        <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
-                        <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
-                            multiline={true} value={this.state.Description} />
-                    </View>
-                    <Button
-                        large
-                        icon={{ name: 'envira', type: 'font-awesome' }}
-                        title={!this.state.Id === true ? 'Thêm Mới' : 'Sửa Lại'}
-                        onPress={() => { this.addNewUpdate() }}
-                        style={{ paddingTop: 40, }}
-                        disabled={this.state.Name === ''}
-                        buttonStyle={{ backgroundColor: 'green' }}
-                    />
-                    <Button
-                        large
-                        icon={{ name: 'refresh', type: 'font-awesome' }}
-                        title='Làm Mới'
-                        onPress={() => { this.reset() }}
-                        style={{ paddingTop: 40 }}
-                    />
-                </View>
+                </ScrollView>
             </TouchableWithoutFeedback>
         );
     }
@@ -221,7 +242,7 @@ const styles = StyleSheet.create({
     },
     labelStyle: {
         color: 'green',
-        fontSize: 27
+        fontSize: 27,
     },
     inputStyle: {
         color: '#24292e',
