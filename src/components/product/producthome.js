@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    Text, View, Picker, TouchableOpacity, StyleSheet, TextInput, Alert, TouchableWithoutFeedback, Keyboard,
+    Text, View, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard,
     ScrollView
 }
     from 'react-native';
@@ -18,7 +18,7 @@ class ProductHome extends React.Component {
             Description: '',
             Quantity: '',
             Price: '',
-            DateCreat: Const.formatDate(new Date()),
+            DateCreat: Const.formatDate('save'),
             DateUpdate: '',
             dataCategory: [],
             CategoryName: ''
@@ -71,7 +71,7 @@ class ProductHome extends React.Component {
                 Price: item.Price,
                 Description: item.Description,
                 DateCreat: item.DateCreat,
-                DateUpdate: Const.formatDate(new Date()),
+                DateUpdate: Const.formatDate('save'),
             })
         }
     }
@@ -91,7 +91,7 @@ class ProductHome extends React.Component {
         if (!!this.state.Id) {
             this.setState({
                 Id: 0,
-                DateCreat: Const.formatDate(new Date()),
+                DateCreat: Const.formatDate('save'),
                 DateUpdate: '',
             });
         }
@@ -124,7 +124,7 @@ class ProductHome extends React.Component {
     }
     update() {
         this.setState({
-            DateUpdate: Const.formatDate(new Date()),
+            DateUpdate: Const.formatDate('save'),
         });
         api.updateproduct(this.state).then(res => {
             if (res) Alert.alert('Sửa lại thành công');
@@ -150,7 +150,7 @@ class ProductHome extends React.Component {
             Quantity: '',
             Price: '',
             Description: '',
-            DateCreat: Const.formatDate(new Date()),
+            DateCreat: Const.formatDate('save'),
             DateUpdate: '',
             CategoryName: this.state.dataCategory[0].Name
         });

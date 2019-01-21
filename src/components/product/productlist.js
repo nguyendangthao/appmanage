@@ -1,9 +1,9 @@
 import React from 'react';
 import {
-    Text, View, Picker, TouchableOpacity, StyleSheet, TextInput, Alert, TouchableWithoutFeedback, Keyboard,
-    ScrollView, RefreshControl, FlatList
+    Text, View, StyleSheet, Alert,
+    ScrollView, RefreshControl, FlatList, ActivityIndicator
 } from 'react-native';
-import { List, ListItem, Button } from 'react-native-elements';
+import { List } from 'react-native-elements';
 import api from '../../data';
 import Const from '../../const';
 import Swipeout from 'react-native-swipeout';
@@ -32,9 +32,10 @@ class ProductList extends React.Component {
 
     };
     componentWillMount() {
+        this.setState({ isloading: true });
         api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
             let newPage = this.state.page + 1;
-            this.setState({ data: res, page: newPage });
+            this.setState({ data: res, page: newPage, isloading: false });
         })
     }
     _onRefresh = () => {
@@ -90,45 +91,54 @@ class ProductList extends React.Component {
                     />
                 }
             >
-                <List >
-                    <FlatList
-                        data={this.state.data}
-                        keyExtractor={(item) => item.Id.toString()}
-                        renderItem={
-                            ({ item, index }) =>
-                                <Swipeout
-                                    right={[
-                                        {
-                                            text: 'Xóa',
-                                            backgroundColor: 'red',
-                                            onPress: () => { this.delete(item.Id) }
-                                        },
-                                    ]}
-                                    left={[
-                                        {
-                                            text: 'Chi Tiết',
-                                            backgroundColor: 'green',
-                                            onPress: () => { this.props.navigation.navigate('productHome', { item: item }); }
-                                        }
-                                    ]}
-                                    autoClose={true}
-                                    style={[styles.swipeout, index == this.state.data.length - 1 && { marginBottom: 20 }]}
-                                >
-                                    <View style={{ height: 100 }}>
-                                        <View style={{ flex: 1, flexDirection: 'row', }}>
-                                            <Text style={{ flex: 0.6, fontSize: 20, color: 'green', paddingLeft: 5, }}>{item.Name}</Text>
-                                            <Text style={{ flex: 0.4, fontSize: 20, position: 'absolute', right: 0, }}>
-                                                {!item.DateUpdate === false ? item.DateUpdate + '-S' : item.DateCreat + '-M'}
-                                            </Text>
+                {
+                    this.state.isloading === false &&
+                    <List >
+                        <FlatList
+                            data={this.state.data}
+                            keyExtractor={(item) => item.Id.toString()}
+                            renderItem={
+                                ({ item, index }) =>
+                                    <Swipeout
+                                        right={[
+                                            {
+                                                text: 'Xóa',
+                                                backgroundColor: 'red',
+                                                onPress: () => { this.delete(item.Id) }
+                                            },
+                                        ]}
+                                        left={[
+                                            {
+                                                text: 'Chi Tiết',
+                                                backgroundColor: 'green',
+                                                onPress: () => { this.props.navigation.navigate('productHome', { item: item }); }
+                                            }
+                                        ]}
+                                        autoClose={true}
+                                        style={[styles.swipeout, index == this.state.data.length - 1 && { marginBottom: 20 }]}
+                                    >
+                                        <View style={{ height: 100 }}>
+                                            <View style={{ flex: 1, flexDirection: 'row', }}>
+                                                <Text style={{ flex: 0.6, fontSize: 20, color: 'green', paddingLeft: 5, }}>{item.Name}</Text>
+                                                <Text style={{ flex: 0.4, fontSize: 20, position: 'absolute', right: 0, }}>
+                                                    {!item.DateUpdate === false ? Const.formatDate('read', item.DateUpdate) + '-S' : Const.formatDate('read', item.DateCreat) + '-M'}
+                                                </Text>
+                                            </View>
+                                            <Text style={{ flex: 1, paddingLeft: 5 }}>Số Lượng: {item.Quantity}. --- Giá: {item.Price}.</Text>
+
                                         </View>
-                                        <Text style={{ flex: 1, paddingLeft: 5 }}>Số Lượng: {item.Quantity}. --- Giá: {item.Price}.</Text>
+                                    </Swipeout>
+                            }
+                        />
 
-                                    </View>
-                                </Swipeout>
-                        }
-                    />
-
-                </List>
+                    </List>
+                }
+                {
+                    this.state.isloading &&
+                    <View style={[styles.containerLoading, styles.horizontal]}>
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    </View>
+                }
             </ScrollView>
         );
     }
@@ -145,6 +155,12 @@ const styles = StyleSheet.create({
         marginRight: '2%',
         marginTop: 10,
     },
+    containerLoading: {
+        justifyContent: 'center',
+    },
+    horizontal: {
+        marginTop: '45%'
+    }
 
 });
 

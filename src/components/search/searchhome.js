@@ -1,8 +1,8 @@
 import React from 'react';
-import { Text, View, Picker, TouchableOpacity, FlatList, ScrollView, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { Text, View, ScrollView, StyleSheet, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import DatePicker from 'react-native-datepicker'
-import api, { geta, } from '../../data';
-import { FormLabel, FormInput, Button, SearchBar, CheckBox } from 'react-native-elements';
+import api from '../../data';
+import { FormLabel, FormInput, Button, CheckBox, FormValidationMessage } from 'react-native-elements';
 import Const from '../../const';
 import { Dropdown } from 'react-native-material-dropdown';
 class SearchHome extends React.Component {
@@ -14,7 +14,8 @@ class SearchHome extends React.Component {
             Name: '',
             Description: '',
             DateFrom: '',
-            DateTo: ''
+            DateTo: '',
+            CategoryName: ' ',
         }
         this.getAllCategory = this.getAllCategory.bind(this);
     }
@@ -50,11 +51,32 @@ class SearchHome extends React.Component {
     }
     selectedItem = (value, index, data) => {
         let id = data[index].Id;
-        this.setState({ CategoryId: id });
+        this.setState({ CategoryId: id, CategoryName: data[index].value });
     }
     search() {
-        var a = this.state;
         this.props.navigation.navigate('searchList', { searchObj: this.state });
+    }
+    confirmReset() {
+        Alert.alert(
+            'Thông Báo',
+            'Xác nhận làm mới',
+            [
+                { text: 'Đồng Ý', onPress: this.reset.bind(this) },
+                { text: 'Bỏ', style: 'cancel' },
+            ],
+            { cancelable: false },
+        )
+    }
+    reset() {
+        this.setState({
+            CategoryId: 0,
+            Name: '',
+            Description: '',
+            DateFrom: '',
+            DateTo: '',
+            CategoryName: ' '
+        });
+
     }
     render() {
         return (
@@ -90,6 +112,7 @@ class SearchHome extends React.Component {
                                     onChangeText={this.selectedItem}
                                     selectedItemColor='tomato'
                                     containerStyle={{ marginLeft: '5%', marginRight: '5%' }}
+                                    value={this.state.CategoryName}
                                 />
                             </View>
                         }
@@ -133,42 +156,55 @@ class SearchHome extends React.Component {
                                 locale={'vie'}
                             />
                         </View>
-                        <View style={{ flex: 1, flexDirection: 'row', paddingTop: 20, paddingLeft: 20, paddingRight: 20 }}>
-                            <Text style={[styles.labelStyle, { flex: 0.4, fontWeight: 'bold' }]} >Đến Ngày</Text>
-                            <DatePicker
-                                style={{ flex: 0.6 }}
-                                date={this.state.DateTo}
-                                mode="date"
-                                format="DD-MM-YYYY"
-                                minDate="01-01-2000"
-                                maxDate="01-01-2100"
-                                confirmBtnText="Đồng ý"
-                                cancelBtnText="Bỏ chọn"
-                                placeholder=' '
-                                customStyles={{
-                                    dateIcon: {
-                                        left: 0,
-                                        top: 4,
-                                        marginLeft: 0
-                                    },
-                                    dateInput: {
-                                        marginLeft: 36
-                                    },
-                                    btnTextCancel: {
-                                        color: 'red'
-                                    }
-                                }}
-                                onDateChange={(DateTo) => this.setState({ DateTo })}
-                                locale={'vie'}
-                            />
-                        </View>
+                        {
+                            !this.state.DateFrom === false &&
+                            <View style={{ paddingTop: 20, paddingLeft: 20, paddingRight: 20 }}>
+                                <View style={{ flex: 1, flexDirection: 'row', }}>
+                                    <Text style={[styles.labelStyle, { flex: 0.4, fontWeight: 'bold' }]} >Đến Ngày</Text>
+                                    <DatePicker
+                                        style={{ flex: 0.6 }}
+                                        date={this.state.DateTo}
+                                        mode="date"
+                                        format="DD-MM-YYYY"
+                                        minDate="01-01-2000"
+                                        maxDate="01-01-2100"
+                                        confirmBtnText="Đồng ý"
+                                        cancelBtnText="Bỏ chọn"
+                                        placeholder=' '
+                                        customStyles={{
+                                            dateIcon: {
+                                                left: 0,
+                                                top: 4,
+                                                marginLeft: 0
+                                            },
+                                            dateInput: {
+                                                marginLeft: 36
+                                            },
+                                            btnTextCancel: {
+                                                color: 'red'
+                                            }
+                                        }}
+                                        onDateChange={(DateTo) => this.setState({ DateTo })}
+                                        locale={'vie'}
+                                    />
+                                </View>
+                                <FormValidationMessage containerStyle={{ paddingLeft: 40 }}>Ngày đến phải lớn hơn ngày đi</FormValidationMessage>
+                            </View>
+                        }
                         <Button
                             large
                             icon={{ name: 'envira', type: 'font-awesome' }}
                             title={'Tìm Kiếm'}
                             onPress={() => this.search()}
-                            style={{ paddingTop: 40, paddingBottom: 40 }}
+                            style={{ paddingTop: 40 }}
                             buttonStyle={{ backgroundColor: 'green' }}
+                        />
+                        <Button
+                            large
+                            icon={{ name: 'refresh', type: 'font-awesome' }}
+                            title='Làm Mới'
+                            onPress={this.confirmReset.bind(this)}
+                            style={{ paddingTop: 40, paddingBottom: 40 }}
                         />
                     </View>
                 </ScrollView>

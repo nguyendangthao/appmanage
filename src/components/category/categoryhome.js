@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, Picker, TouchableOpacity, StyleSheet, TextInput, Alert, TouchableWithoutFeedback, Keyboard }
+import { Text, View, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard }
     from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 import api from '../../data';
@@ -12,7 +12,7 @@ class CategoryHome extends React.Component {
             Id: 0,
             Name: '',
             Description: '',
-            DateCreat: Const.formatDate(new Date()),
+            DateCreat: Const.formatDate('save'),
             DateUpdate: ''
         }
     }
@@ -42,7 +42,7 @@ class CategoryHome extends React.Component {
                 Name: item.Name,
                 Description: item.Description,
                 DateCreat: item.DateCreat,
-                DateUpdate: Const.formatDate(new Date()),
+                DateUpdate: Const.formatDate('save'),
             })
         }
     }
@@ -74,7 +74,7 @@ class CategoryHome extends React.Component {
             return;
         }
         this.setState({
-            DateUpdate: Const.formatDate(new Date()),
+            DateUpdate: Const.formatDate('save')
         });
         api.UpdateCategory(this.state).then(res => {
             if (res) Alert.alert('Sửa lại thành công');
@@ -99,7 +99,7 @@ class CategoryHome extends React.Component {
             Id: 0,
             Name: '',
             Description: '',
-            DateCreat: Const.formatDate(new Date()),
+            DateCreat: Const.formatDate('save'),
             DateUpdate: '',
         });
     }

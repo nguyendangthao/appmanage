@@ -1,4 +1,5 @@
 import Expo, { SQLite } from 'expo';
+import Const from './const';
 const db = SQLite.openDatabase('db.db');
 export const Data = function () {
     db.transaction(tx => {
@@ -165,19 +166,48 @@ class API {
 
     //search
 
-    searchCategory() {
+    searchCategory(page = 0, pageSize = 0, model) {
+        let stringQuery = `select * from Category where`
+        var paramPage = [(page - 1) * pageSize, pageSize];
+        var param = [];
+        if (!!model.Name) {
+            stringQuery = stringQuery + ` Name LIKE '%${model.Name}%' and`;
+        }
+        if (!!model.Description) {
+            stringQuery = stringQuery + ` Description LIKE '%${model.Description}%' and`;
+        }
+        if (!!model.DateFrom) {
+            var dateNow = Const.formatDate(new Date());
+            var date = Const.formatDateSaveData(model.DateFrom);
+            stringQuery = stringQuery + ` DateCreat >= ${date} AND DateCreat <= ${dateNow} and`;
+        }
+        if (!!model.DateFrom && !!Data.DateTo) {
+            var dateFrom = Const.formatDateSaveData(model.DateFrom);
+            var dateTo = Const.formatDateSaveData(model.DateTo);
+            stringQuery = stringQuery + ` DateCreat BETWEEN date(${dateFrom}) AND date(${dateTo}) and`;
+
+        }
+
+        if (stringQuery.slice(stringQuery.length - 3) === 'and')
+            stringQuery = stringQuery.slice(0, stringQuery.length - 4);
+        else
+            stringQuery = stringQuery.slice(0, stringQuery.length - 6);
+        stringQuery = stringQuery + ` ORDER BY Id DESC LIMIT ?,?;`;
+        param = [...param, ...paramPage];
         return new Promise(function (resolve, reject) {
             db.transaction(
                 tx => {
-                    tx.executeSql('update Product set CategoryId=?, Name=?,Quantity=?,Price=?,Description=?,DateUpdate=? where Id=?;)',
-                        [model.CategoryId, model.Name, model.Quantity, model.Price, model.Description, model.DateUpdate, model.Id], function (tx, res) {
-                            var resuft;
-                            if (!res.insertId)
-                                resuft = true;
-                            else
-                                resuft = false;
-                            resolve(resuft);
+                    if (page === 0 && pageSize === 0) {
+                        tx.executeSql('select * from Category ORDER BY Id DESC', [], function (tx, res) {
+                            resolve(res.rows._array);
                         });
+                    }
+                    else {
+                        tx.executeSql(stringQuery, [...param], function (tx, res) {
+                            resolve(res.rows._array);
+                        });
+                    }
+
                 },
 
             )
