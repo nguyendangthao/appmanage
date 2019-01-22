@@ -16,7 +16,7 @@ class CategoryList extends React.Component {
             refreshing: false,// hiểu kiểu như cái loading trên web,vào k load get data thì true là đang load,get xong là false
             page: 1,
             pageSize: 20,
-            isloading: false
+            isloading: false,
         }
     }
 
@@ -33,53 +33,82 @@ class CategoryList extends React.Component {
     };
 
     componentWillMount() {
+        var pageFrom = this.props.navigation.getParam('pageFrom');
+        var dataSearch = this.props.navigation.getParam('dataSearch');
         this.setState({ isloading: true });
-        api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
-            let newPage = this.state.page + 1;
-            this.setState({ data: res, page: newPage, isloading: false });
-        })
+        if (pageFrom === 'search') {
+            this.setState({ data: dataSearch, isloading: false });
+        }
+        else {
+            api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+                let newPage = this.state.page + 1;
+                this.setState({ data: res, page: newPage, isloading: false });
+            })
+        }
+    }
+    componentWillReceiveProps(nextProps) {
+        var pageFrom = nextProps.navigation.getParam('pageFrom');
+        var dataSearch = nextProps.navigation.getParam('dataSearch');
+        this.setState({ isloading: true });
+        if (pageFrom === 'search') {
+            this.setState({ data: dataSearch, isloading: false });
+        }
     }
 
     _onRefresh = () => {
-        this.setState({ refreshing: true });
-        api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
-            if (res.length === 0) {
-                this.setState({ page: 1, pageSize: this.state.pageSize * 2 });
-                api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
-                    this.setState({ data: res, refreshing: false, page: this.state.page + 1 });
-                })
-                return;
-            }
-            let newPage = this.state.page + 1;
-            this.setState({
-                data: res,
-                refreshing: false,
-                page: newPage,
-            });
+        var pageFrom = this.props.navigation.getParam('pageFrom');
+        if (pageFrom !== 'search') {
+            this.setState({ refreshing: true });
+            api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+                if (res.length === 0) {
+                    this.setState({ page: 1, pageSize: this.state.pageSize * 2 });
+                    api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+                        this.setState({ data: res, refreshing: false, page: this.state.page + 1 });
+                    })
+                    return;
+                }
+                let newPage = this.state.page + 1;
+                this.setState({
+                    data: res,
+                    refreshing: false,
+                    page: newPage,
+                });
 
-        })
+            })
+        }
+
     }
 
-    comfirmDelete(id) {
+    comfirmDelete(id, index) {
+        var pageFrom = this.props.navigation.getParam('pageFrom');
+        this.setState({ isloading: true });
         api.deleteCategory(id).then(res => {
             if (res.length == 0) {
-                this.setState({ page: this.state.page - 1 });
-                api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
-                    let newPage = this.state.page + 1;
-                    this.setState({
-                        data: res, page: newPage,
-                    });
-                })
+                if (pageFrom === 'search') {
+                    this.setState({ data: this.state.data.splice(index, 1), isloading: false });
+                    Alert.alert('Xóa thành công');
+                }
+                else {
+                    this.setState({ page: this.state.page - 1 });
+                    api.getAllCategory(this.state.page, this.state.pageSize).then(res => {
+                        let newPage = this.state.page + 1;
+                        this.setState({
+                            data: res, page: newPage,
+                            isloading: false
+                        });
+                        Alert.alert('Xóa thành công');
+                    })
+                }
             }
         })
     }
 
-    delete(id) {
+    delete(id, index) {
         Alert.alert(
             'Thông Báo',
             'Xác nhận xóa',
             [
-                { text: 'Đồng Ý', onPress: this.comfirmDelete.bind(this, id) },
+                { text: 'Đồng Ý', onPress: this.comfirmDelete.bind(this, id, index) },
                 { text: 'Bỏ', style: 'cancel' },
             ],
             { cancelable: false },
@@ -109,7 +138,7 @@ class CategoryList extends React.Component {
                                             {
                                                 text: 'Xóa',
                                                 backgroundColor: 'red',
-                                                onPress: () => { this.delete(item.Id) }
+                                                onPress: () => { this.delete(item.Id, index) }
                                             },
                                         ]}
                                         left={[
@@ -125,7 +154,7 @@ class CategoryList extends React.Component {
                                         <View style={{ height: 100 }}>
                                             <View style={{ flex: 1, flexDirection: 'row', }}>
                                                 <Text style={{ flex: 0.6, fontSize: 20, color: 'green', paddingLeft: 5, }}>{item.Name}</Text>
-                                                <Text style={{ flex: 0.4, fontSize: 20, position: 'absolute', right: 0, }}>
+                                                <Text style={{ flex: 0.4, fontSize: 18, position: 'absolute', right: 0, }}>
                                                     {!item.DateUpdate === false ? Const.formatDate('read', item.DateUpdate) + '-S' : Const.formatDate('read', item.DateCreat) + '-M'}
                                                 </Text>
                                             </View>

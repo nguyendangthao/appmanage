@@ -63,11 +63,12 @@ class CategoryHome extends React.Component {
         if (!this.state.Id) {
             api.addCategory(this.state).then(res => {
                 this.setState({
-                    Id: res[0].Id,
-                    Name: res[0].Name,
-                    Description: res[0].Description,
-                    DateCreat: res[0].DateCreat,
-                    DateUpdate: res[0].DateUpdate,
+                    Id: res
+                    //Id: res[0].Id,
+                    // Name: res[0].Name,
+                    // Description: res[0].Description,
+                    // DateCreat: res[0].DateCreat,
+                    // DateUpdate: res[0].DateUpdate,
                 });
                 Alert.alert('Thêm mới thành công');
             })

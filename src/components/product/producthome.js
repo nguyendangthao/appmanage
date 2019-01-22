@@ -97,14 +97,15 @@ class ProductHome extends React.Component {
         }
         api.addProduct(this.state).then(res => {
             this.setState({
-                Id: res[0].Id,
-                CategoryId: res[0].CategoryId,
-                Name: res[0].Name,
-                Quantity: res[0].Quantity,
-                Price: res[0].Price,
-                Description: res[0].Description,
-                DateCreat: res[0].DateCreat,
-                DateUpdate: res[0].DateUpdate,
+                Id: res
+                // Id: res[0].Id,
+                // CategoryId: res[0].CategoryId,
+                // Name: res[0].Name,
+                // Quantity: res[0].Quantity,
+                // Price: res[0].Price,
+                // Description: res[0].Description,
+                // DateCreat: res[0].DateCreat,
+                // DateUpdate: res[0].DateUpdate,
             });
             Alert.alert('Thêm mới thành công');
         })
