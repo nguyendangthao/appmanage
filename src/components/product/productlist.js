@@ -22,14 +22,16 @@ class ProductList extends React.Component {
 
         return {
             title: 'Danh Sách Sản Phẩm',
+            headerTitleStyle: {
+                textAlign: 'center',
+                flex: 1
+            },
             headerLeft: (<Text style={{ color: '#00a4db', paddingLeft: 5 }}
                 onPress={() => {
                     navigation.navigate('productHome');
                 }}
             >Sản Phẩm</Text>),
-
         }
-
     };
     componentWillMount() {
         var pageFrom = this.props.navigation.getParam('pageFrom');
@@ -55,23 +57,26 @@ class ProductList extends React.Component {
         }
     }
     _onRefresh = () => {
-        this.setState({ refreshing: true });
-        api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
-            if (res.length === 0) {
-                this.setState({ page: 1, pageSize: this.state.pageSize * 2 });
-                api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
-                    this.setState({ data: res, refreshing: false, page: this.state.page + 1 });
-                })
-                return;
-            }
-            let newPage = this.state.page + 1;
-            this.setState({
-                data: res,
-                refreshing: false,
-                page: newPage,
-            });
+        var pageFrom = this.props.navigation.getParam('pageFrom');
+        if (pageFrom !== 'search') {
+            this.setState({ refreshing: true });
+            api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
+                if (res.length === 0) {
+                    this.setState({ page: 1, pageSize: this.state.pageSize * 2 });
+                    api.getAllProduct(this.state.page, this.state.pageSize).then(res => {
+                        this.setState({ data: res, refreshing: false, page: this.state.page + 1 });
+                    })
+                    return;
+                }
+                let newPage = this.state.page + 1;
+                this.setState({
+                    data: res,
+                    refreshing: false,
+                    page: newPage,
+                });
 
-        })
+            })
+        }
     }
     comfirmDelete(id, index) {
         var pageFrom = this.props.navigation.getParam('pageFrom');
@@ -79,7 +84,9 @@ class ProductList extends React.Component {
         api.deleteProduct(id).then(res => {
             if (res.length == 0) {
                 if (pageFrom === 'search') {
-                    this.setState({ data: this.state.data.splice(index, 1), isloading: false });
+                    let array = [...this.state.data];
+                    array.splice(index, 1);
+                    this.setState({ data: array, isloading: false });
                     Alert.alert('Xóa thành công');
                 }
                 else {

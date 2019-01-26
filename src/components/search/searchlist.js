@@ -5,8 +5,6 @@ import {
 } from 'react-native';
 import { Text, List } from 'react-native-elements';
 import api from '../../data';
-import Const from '../../const';
-import Swipeout from 'react-native-swipeout';
 
 class SearchList extends React.Component {
     constructor(props) {
@@ -25,6 +23,10 @@ class SearchList extends React.Component {
         var searchObj = navigation.getParam('searchObj');
         return {
             title: 'Chi Tiết Tìm Kiếm',
+            headerTitleStyle: {
+                textAlign: 'center',
+                flex: 1
+            },
             headerLeft: (<Text style={{ color: '#00a4db', paddingLeft: 5 }}
                 onPress={() => {
                     navigation.navigate('searchHome');
@@ -41,9 +43,7 @@ class SearchList extends React.Component {
                         api.searchCategory(searchObj).then(res => {
                             navigation.navigate('categoryList', { pageFrom: 'search', dataSearch: res });
                         });
-
                     }
-
 
                 }}
             >Danh Sách</Text>),

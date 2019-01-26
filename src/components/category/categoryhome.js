@@ -3,8 +3,8 @@ import { Text, View, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard }
     from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 import api from '../../data';
-import Const from '../../const';
-
+import Const, { ReloadCategory } from '../../const';
+import { connect } from 'react-redux';
 class CategoryHome extends React.Component {
     constructor(props) {
         super(props)
@@ -21,8 +21,9 @@ class CategoryHome extends React.Component {
         Keyboard.dismiss;
         return {
             title: 'Loại Hàng',
-            headerStyle: {
-                color: 'tomato',
+            headerTitleStyle: {
+                textAlign: 'center',
+                flex: 1
             },
             headerRight: (
                 <Text style={{ color: '#00a4db', paddingRight: 5 }}
@@ -46,7 +47,6 @@ class CategoryHome extends React.Component {
             })
         }
     }
-
     confirmAddNewUpdate() {
         Alert.alert(
             'Thông Báo',
@@ -64,13 +64,9 @@ class CategoryHome extends React.Component {
             api.addCategory(this.state).then(res => {
                 this.setState({
                     Id: res
-                    //Id: res[0].Id,
-                    // Name: res[0].Name,
-                    // Description: res[0].Description,
-                    // DateCreat: res[0].DateCreat,
-                    // DateUpdate: res[0].DateUpdate,
                 });
                 Alert.alert('Thêm mới thành công');
+                this.props.CategoryDispatch(ReloadCategory)
             })
             return;
         }
@@ -78,7 +74,10 @@ class CategoryHome extends React.Component {
             DateUpdate: Const.formatDate('save')
         });
         api.UpdateCategory(this.state).then(res => {
-            if (res) Alert.alert('Sửa lại thành công');
+            if (res) {
+                Alert.alert('Sửa lại thành công');
+                this.props.CategoryDispatch(ReloadCategory)
+            }
             else Alert.alert('Sửa lại không thành công');
         })
     }
@@ -125,23 +124,36 @@ class CategoryHome extends React.Component {
                         icon={{ name: 'envira', type: 'font-awesome' }}
                         title={!this.state.Id === true ? 'Thêm Mới' : 'Sửa Lại'}
                         onPress={() => this.confirmAddNewUpdate()}
-                        style={{ paddingTop: 40, }}
+                        // style={{ paddingTop: 40, }}
                         disabled={this.state.Name === ''}
                         buttonStyle={{ backgroundColor: 'green' }}
+                        containerViewStyle={{ paddingTop: 40 }}
+
                     />
                     <Button
                         large
                         icon={{ name: 'refresh', type: 'font-awesome' }}
                         title='Làm Mới'
                         onPress={this.confirmReset.bind(this)}
-                        style={{ paddingTop: 40 }}
+                        containerViewStyle={{ paddingTop: 40 }}
                     />
                 </View>
             </TouchableWithoutFeedback>
         );
     }
 }
-export default CategoryHome
+
+const mapPropsToDispatch = dispatch => ({
+    CategoryDispatch: (action) => {
+        return dispatch({
+            type: action,
+        });
+    },
+});
+
+export default connect(null, mapPropsToDispatch)(CategoryHome);
+
+
 
 const styles = StyleSheet.create({
     contanir: {

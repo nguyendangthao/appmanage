@@ -42,7 +42,14 @@ class Const {
         let newDate = date.split('-');
         return `${newDate[2]}-${newDate[1]}-${newDate[0]}`;
     }
-
 }
 
 export default new Const()
+
+
+
+// constant
+export const AddCategory = 'AddCategory';
+export const UpdateCategory = 'UpdateCategory';
+export const DeleteCategory = 'DeleteCategory';
+export const ReloadCategory = 'ReloadCategory';

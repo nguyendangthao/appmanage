@@ -45,11 +45,6 @@ class API {
                 tx => {
                     tx.executeSql('insert into Category (Name,Description,IsDelete,DateCreat,DateUpdate) values (?,?,?,?,?)',
                         [model.Name, model.Description, 0, model.DateCreat, model.DateUpdate], function (tx, res) {
-                            // if (res.insertId) {
-                            //     tx.executeSql('select * from Category where Id=?;', [res.insertId], function (tx, res) {
-                            //         resolve(res.rows._array);
-                            //     })
-                            // };
                             if (res.insertId)
                                 resolve(res.insertId);
 
@@ -67,9 +62,7 @@ class API {
                     tx.executeSql('delete  from Category where Id=?;', [id], function (tx, res) {
                         resolve(res.rows._array);
                     })
-
                 },
-
             )
         });
     }
@@ -88,11 +81,21 @@ class API {
                             resolve(resuft);
                         });
                 },
-
             )
         });
     }
+    checkdeleteCategory(id) {
+        return new Promise(function (resolve, reject) {
+            db.transaction(
+                tx => {
+                    tx.executeSql('select * from Product where CategoryId=?;', [id], function (tx, res) {
+                        resolve(res.rows._array.length);
+                    });
+                },
+            )
+        });
 
+    }
 
     // Product
     getAllProduct(page = 0, pageSize = 0) {
@@ -122,11 +125,6 @@ class API {
                 tx => {
                     tx.executeSql('insert into Product (CategoryId,Name,Description,Quantity,Price,IsDelete,DateCreat,DateUpdate) values (?,?,?,?,?,?,?,?)',
                         [model.CategoryId, model.Name, model.Description, model.Quantity, model.Price, 0, model.DateCreat, model.DateUpdate], function (tx, res) {
-                            // if (res.insertId) {
-                            //     tx.executeSql('select * from Product where Id=?;', [res.insertId], function (tx, res) {
-                            //         resolve(res.rows._array);
-                            //     })
-                            // };
                             if (res.insertId)
                                 resolve(res.insertId);
                         });

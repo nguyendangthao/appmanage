@@ -5,6 +5,7 @@ import api from '../../data';
 import { FormLabel, FormInput, Button, CheckBox, FormValidationMessage } from 'react-native-elements';
 import Const from '../../const';
 import { Dropdown } from 'react-native-material-dropdown';
+import { connect } from 'react-redux';
 class SearchHome extends React.Component {
     constructor(props) {
         super(props)
@@ -23,8 +24,9 @@ class SearchHome extends React.Component {
         Keyboard.dismiss;
         return {
             title: 'Tìm Kiếm',
-            headerStyle: {
-                color: 'tomato',
+            headerTitleStyle: {
+                textAlign: 'center',
+                flex: 1
             },
 
         }
@@ -32,7 +34,7 @@ class SearchHome extends React.Component {
     componentWillMount() {
         this.getAllCategory();
     }
-    componentWillUpdate() {
+    componentWillReceiveProps(nextProps) {
         this.getAllCategory();
     }
     getAllCategory() {
@@ -40,9 +42,13 @@ class SearchHome extends React.Component {
             res.map((item) => {
                 item['value'] = item.Name;
             })
+            if (!this.state.CategoryId) {
+                var categoryName = res.filter((o) => { return o.Id === this.state.CategoryId })[0].Name || '';
+            }
             this.setState({
                 dataCategory: res,
-                CategoryId: res.length > 0 ? res[0].Id : 0,
+                CategoryId: 0,
+                CategoryName: categoryName || ' ',
             });
         })
     }
@@ -196,15 +202,15 @@ class SearchHome extends React.Component {
                             icon={{ name: 'envira', type: 'font-awesome' }}
                             title={'Tìm Kiếm'}
                             onPress={() => this.search()}
-                            style={{ paddingTop: 40 }}
                             buttonStyle={{ backgroundColor: 'green' }}
+                            containerViewStyle={{ paddingBottom: 40, paddingTop: 40 }}
                         />
                         <Button
                             large
                             icon={{ name: 'refresh', type: 'font-awesome' }}
                             title='Làm Mới'
                             onPress={this.confirmReset.bind(this)}
-                            style={{ paddingTop: 40, paddingBottom: 40 }}
+                            containerViewStyle={{ paddingBottom: 40 }}
                         />
                     </View>
                 </ScrollView>
@@ -213,8 +219,22 @@ class SearchHome extends React.Component {
     }
 }
 
-export default SearchHome
+function mapStateToProps(state) {
+    return {
+        reloadCategory: state.categoryReducer.reloadCategory,
+    };
+}
+export default connect(mapStateToProps, null)(SearchHome);
+// const mapPropsToDispatch = dispatch => ({
+//     CategoryDispatch: (action, bol) => {
+//         return dispatch({
+//             type: action,
+//             reloadCategory: bol
+//         });
+//     },
+// });
 
+// export default connect(mapStateToProps, mapPropsToDispatch)(SearchHome);
 
 
 const styles = StyleSheet.create({

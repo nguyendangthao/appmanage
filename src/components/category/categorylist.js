@@ -5,9 +5,9 @@ import {
 } from 'react-native';
 import { List } from 'react-native-elements';
 import api from '../../data';
-import Const from '../../const';
+import Const, { ReloadCategory } from '../../const';
 import Swipeout from 'react-native-swipeout';
-
+import { connect } from 'react-redux';
 class CategoryList extends React.Component {
     constructor(props) {
         super(props)
@@ -23,6 +23,10 @@ class CategoryList extends React.Component {
     static navigationOptions = ({ navigation }) => {
         return {
             title: 'Danh Sách Loại Hàng',
+            headerTitleStyle: {
+                textAlign: 'center',
+                flex: 1
+            },
             headerLeft: (<Text style={{ color: '#00a4db', paddingLeft: 5 }}
                 onPress={() => {
                     navigation.navigate('categoryHome');
@@ -79,14 +83,23 @@ class CategoryList extends React.Component {
 
     }
 
-    comfirmDelete(id, index) {
+    async  comfirmDelete(item, index) {
+        var resuft = false;
+        await api.checkdeleteCategory(item.Id).then(res => {
+            if (res > 0) {
+                Alert.alert('Cảnh Báo', `${item.Name} đang được dùng không thể xóa`);
+                resuft = true;
+            }
+        });
+        if (resuft) return;
         var pageFrom = this.props.navigation.getParam('pageFrom');
         this.setState({ isloading: true });
-        api.deleteCategory(id).then(res => {
+        api.deleteCategory(item.Id).then(res => {
             if (res.length == 0) {
                 if (pageFrom === 'search') {
-                    this.setState({ data: this.state.data.splice(index, 1), isloading: false });
-                    Alert.alert('Xóa thành công');
+                    let array = [...this.state.data];
+                    array.splice(index, 1);
+                    this.setState({ data: array, isloading: false });
                 }
                 else {
                     this.setState({ page: this.state.page - 1 });
@@ -96,19 +109,20 @@ class CategoryList extends React.Component {
                             data: res, page: newPage,
                             isloading: false
                         });
-                        Alert.alert('Xóa thành công');
                     })
                 }
+                Alert.alert('Xóa thành công');
+                this.props.CategoryDispatch(ReloadCategory)
             }
         })
     }
 
-    delete(id, index) {
+    delete(item, index) {
         Alert.alert(
             'Thông Báo',
             'Xác nhận xóa',
             [
-                { text: 'Đồng Ý', onPress: this.comfirmDelete.bind(this, id, index) },
+                { text: 'Đồng Ý', onPress: this.comfirmDelete.bind(this, item, index) },
                 { text: 'Bỏ', style: 'cancel' },
             ],
             { cancelable: false },
@@ -138,7 +152,7 @@ class CategoryList extends React.Component {
                                             {
                                                 text: 'Xóa',
                                                 backgroundColor: 'red',
-                                                onPress: () => { this.delete(item.Id, index) }
+                                                onPress: () => { this.delete(item, index) }
                                             },
                                         ]}
                                         left={[
@@ -178,8 +192,16 @@ class CategoryList extends React.Component {
         );
     }
 }
-export default CategoryList
+// export default CategoryList
+const mapPropsToDispatch = dispatch => ({
+    CategoryDispatch: (action) => {
+        return dispatch({
+            type: action,
+        });
+    },
+});
 
+export default connect(null, mapPropsToDispatch)(CategoryList);
 const styles = StyleSheet.create({
     contanir: {
         flex: 1,

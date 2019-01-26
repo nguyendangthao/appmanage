@@ -1,13 +1,14 @@
 import React from 'react';
 import {
     Text, View, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard,
-    ScrollView
+    ScrollView, KeyboardAvoidingView, Platform
 }
     from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 import api from '../../data';
 import Const from '../../const';
 import { Dropdown } from 'react-native-material-dropdown';
+import { connect } from 'react-redux';
 class ProductHome extends React.Component {
     constructor(props) {
         super(props)
@@ -21,7 +22,7 @@ class ProductHome extends React.Component {
             DateCreat: Const.formatDate('save'),
             DateUpdate: '',
             dataCategory: [],
-            CategoryName: ''
+            CategoryName: '',
         }
         this.getAllCategory = this.getAllCategory.bind(this);
     }
@@ -29,8 +30,9 @@ class ProductHome extends React.Component {
         Keyboard.dismiss;
         return {
             title: 'Sản Phẩm',
-            headerStyle: {
-                color: 'tomato',
+            headerTitleStyle: {
+                textAlign: 'center',
+                flex: 1
             },
             headerRight: (
                 <Text style={{ color: '#00a4db', paddingRight: 5 }}
@@ -38,31 +40,37 @@ class ProductHome extends React.Component {
                         navigation.navigate('productList');
                     }}
                 >Danh Sách</Text>
-            ),
+            )
         }
-    }
+
+    };
 
     componentWillMount() {
         this.getAllCategory();
     }
-    componentWillUpdate() {
-        this.getAllCategory();
-    }
-    getAllCategory() {
-        api.getAllCategory().then(res => {
+    async  getAllCategory() {
+        await api.getAllCategory().then(res => {
             res.map((item) => {
                 item['value'] = item.Name;
             })
             this.setState({
                 dataCategory: res,
-                CategoryId: res.length > 0 ? res[0].Id : 0,
-                CategoryName: res.length > 0 ? res[0].Name : 0,
             });
+            var item = this.props.navigation.getParam('item');
+            if (!item) {
+                this.setState({
+                    CategoryId: res.length > 0 ? res[0].Id : 0,
+                    CategoryName: res.length > 0 ? res[0].Name : '',
+                });
+            }
         });
     }
-    componentWillReceiveProps(nextProps) {
+    async componentWillReceiveProps(nextProps) {
+        if (this.props.reloadCategory !== nextProps.reloadCategory)
+            await this.getAllCategory();
         var item = nextProps.navigation.getParam('item');
         if (item) {
+            var categoryName = this.state.dataCategory.filter((o) => { return o.Id === item.CategoryId })[0].Name || '';
             this.setState({
                 Id: item.Id,
                 CategoryId: item.CategoryId,
@@ -72,10 +80,10 @@ class ProductHome extends React.Component {
                 Description: item.Description,
                 DateCreat: item.DateCreat,
                 DateUpdate: Const.formatDate('save'),
+                CategoryName: categoryName
             })
         }
     }
-
     confirmAddNew() {
         Alert.alert(
             'Thông Báo',
@@ -98,14 +106,6 @@ class ProductHome extends React.Component {
         api.addProduct(this.state).then(res => {
             this.setState({
                 Id: res
-                // Id: res[0].Id,
-                // CategoryId: res[0].CategoryId,
-                // Name: res[0].Name,
-                // Quantity: res[0].Quantity,
-                // Price: res[0].Price,
-                // Description: res[0].Description,
-                // DateCreat: res[0].DateCreat,
-                // DateUpdate: res[0].DateUpdate,
             });
             Alert.alert('Thêm mới thành công');
         })
@@ -169,73 +169,90 @@ class ProductHome extends React.Component {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 
                 <ScrollView>
-                    <View style={styles.contanir} onPress={Keyboard.dismiss}>
-                        <FormLabel labelStyle={styles.labelStyle}>Loại Hàng</FormLabel>
-                        <Dropdown
-                            data={this.state.dataCategory}
-                            onChangeText={this.selectedItem}
-                            value={this.state.CategoryName}
-                            selectedItemColor='tomato'
-                            containerStyle={{ marginLeft: '5%', marginRight: '5%' }}
-                        />
-                        <View style={{ paddingTop: 10 }}>
-                            <FormLabel labelStyle={styles.labelStyle}>Tên Sản Phẩm</FormLabel>
-                            <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
-                                multiline={true} value={this.state.Name} />
-                            <FormValidationMessage>Tên sản phẩm phải nhập</FormValidationMessage>
-                        </View>
-                        <View style={{ paddingTop: 10 }}>
-                            <FormLabel labelStyle={styles.labelStyle}>Số Lượng</FormLabel>
-                            <FormInput onChangeText={(Quantity) => this.setState({ Quantity })} inputStyle={styles.inputStyle}
-                                multiline={true} value={this.state.Quantity} keyboardType='numeric' />
-                            <FormValidationMessage>Số lượng phải nhâp</FormValidationMessage>
-                        </View>
-                        <View style={{ paddingTop: 10 }}>
-                            <FormLabel labelStyle={styles.labelStyle}>Giá</FormLabel>
-                            <FormInput onChangeText={(Price) => this.changePrice(Price)} inputStyle={styles.inputStyle}
-                                multiline={true} value={this.state.Price} keyboardType='numeric' />
-                            <FormValidationMessage>Giá phải nhập</FormValidationMessage>
-                        </View>
-                        <View style={{ paddingTop: 10 }}>
-                            <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
-                            <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
-                                multiline={true} value={this.state.Description} />
-                        </View>
-                        <Button
-                            large
-                            icon={{ name: 'envira', type: 'font-awesome' }}
-                            title='Thêm Mới'
-                            onPress={this.confirmAddNew.bind(this)}
-                            style={{ paddingTop: 40, }}
-                            disabled={!this.state.Name || !this.state.Quantity || !this.state.Price}
-                            buttonStyle={{ backgroundColor: 'green' }}
-                        />
-                        {this.state.Id !== 0 &&
+                    <KeyboardAvoidingView style={styles.container} behavior="padding" enabled={true}
+                        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} style={{ flex: 1, justifyContent: 'space-between' }}>
+
+                        <View style={styles.contanir} onPress={Keyboard.dismiss}>
+                            <FormLabel labelStyle={styles.labelStyle}>Loại Hàng</FormLabel>
+                            <Dropdown
+                                data={this.state.dataCategory}
+                                onChangeText={this.selectedItem}
+                                value={this.state.CategoryName}
+                                selectedItemColor='tomato'
+                                containerStyle={{ marginLeft: '5%', marginRight: '5%' }}
+                            />
+                            {
+                                this.state.dataCategory.length == 0 &&
+                                <FormValidationMessage>Phải nhập loại hàng trước</FormValidationMessage>
+                            }
+
+                            <View style={{ paddingTop: 10 }}>
+                                <FormLabel labelStyle={styles.labelStyle}>Tên Sản Phẩm</FormLabel>
+                                <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
+                                    multiline={true} value={this.state.Name} />
+                                <FormValidationMessage>Tên sản phẩm phải nhập</FormValidationMessage>
+                            </View>
+                            <View style={{ paddingTop: 10 }}>
+                                <FormLabel labelStyle={styles.labelStyle}>Số Lượng</FormLabel>
+                                <FormInput onChangeText={(Quantity) => this.setState({ Quantity })} inputStyle={styles.inputStyle}
+                                    multiline={true} value={this.state.Quantity} keyboardType='numeric' />
+                                <FormValidationMessage>Số lượng phải nhâp</FormValidationMessage>
+                            </View>
+                            <View style={{ paddingTop: 10 }}>
+                                <FormLabel labelStyle={styles.labelStyle}>Giá</FormLabel>
+                                <FormInput onChangeText={(Price) => this.changePrice(Price)} inputStyle={styles.inputStyle}
+                                    multiline={true} value={this.state.Price} keyboardType='numeric' />
+                                <FormValidationMessage>Giá phải nhập</FormValidationMessage>
+                            </View>
+                            <View style={{ paddingTop: 10 }}>
+                                <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
+                                <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
+                                    multiline={true} value={this.state.Description} />
+                            </View>
                             <Button
                                 large
                                 icon={{ name: 'envira', type: 'font-awesome' }}
-                                title='Sửa Lại'
-                                onPress={this.confirmUpdate.bind(this)}
-                                style={{ paddingTop: 40, }}
+                                title='Thêm Mới'
+                                onPress={this.confirmAddNew.bind(this)}
                                 disabled={!this.state.Name || !this.state.Quantity || !this.state.Price}
-                                buttonStyle={{ backgroundColor: '#90c7e7' }}
+                                buttonStyle={{ backgroundColor: 'green' }}
+                                containerViewStyle={{ paddingTop: 40 }}
                             />
-                        }
-                        <Button
-                            large
-                            icon={{ name: 'refresh', type: 'font-awesome' }}
-                            title='Làm Mới'
-                            onPress={this.confirmReset.bind(this)}
-                            style={{ paddingTop: 40, paddingBottom: 40 }}
-                        />
-                    </View>
+                            {this.state.Id !== 0 &&
+                                <Button
+                                    large
+                                    icon={{ name: 'envira', type: 'font-awesome' }}
+                                    title='Sửa Lại'
+                                    onPress={this.confirmUpdate.bind(this)}
+                                    disabled={!this.state.Name || !this.state.Quantity || !this.state.Price}
+                                    buttonStyle={{ backgroundColor: '#90c7e7' }}
+                                    containerViewStyle={{ paddingTop: 40 }}
+                                />
+                            }
+                            <Button
+                                large
+                                icon={{ name: 'refresh', type: 'font-awesome' }}
+                                title='Làm Mới'
+                                onPress={this.confirmReset.bind(this)}
+                                // style={{ paddingTop: 40, paddingBottom: 40 }}
+                                containerViewStyle={{ paddingTop: 40, paddingBottom: 40 }}
+                            />
+
+                        </View>
+                    </KeyboardAvoidingView>
                 </ScrollView>
-            </TouchableWithoutFeedback>
+
+            </TouchableWithoutFeedback >
         );
     }
 }
-export default ProductHome
+function mapStateToProps(state) {
+    return {
+        reloadCategory: state.categoryReducer.reloadCategory,
+    };
+}
 
+export default connect(mapStateToProps, null)(ProductHome);
 const styles = StyleSheet.create({
     contanir: {
         flex: 1,
