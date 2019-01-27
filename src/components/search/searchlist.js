@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     View, StyleSheet,
-    ScrollView, ActivityIndicator, FlatList
+    ScrollView, ActivityIndicator, FlatList, Platform
 } from 'react-native';
 import { Text, List } from 'react-native-elements';
 import api from '../../data';
@@ -101,10 +101,17 @@ class SearchList extends React.Component {
         var resuft = this.state.data.reduce((total, item, index, arr) => {
             return total += (parseInt(item.Price) * parseInt(item.Quantity));
         }, 0);
-        return resuft.toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        // return resuft.toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        if (Platform.OS === 'ios')
+            return resuft.toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        else
+            return resuft.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' đ';
     }
     renderPrice(item) {
-        return parseInt(item).toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        if (Platform.OS !== 'ios')
+            return parseInt(item).toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        else
+            return parseInt(item).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' đ';
     }
     render() {
         let content = `Tìm kiếm`;

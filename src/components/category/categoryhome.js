@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard }
+import { Text, View, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform }
     from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage, Button } from 'react-native-elements';
 import api from '../../data';
@@ -107,37 +107,40 @@ class CategoryHome extends React.Component {
     render() {
         return (
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View style={styles.contanir} onPress={Keyboard.dismiss}>
-                    <View>
-                        <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
-                        <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
-                            multiline={true} value={this.state.Name} />
-                        <FormValidationMessage>Tên hàng phải nhập</FormValidationMessage>
-                    </View>
-                    <View style={{ paddingTop: 20 }}>
-                        <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
-                        <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
-                            multiline={true} value={this.state.Description} />
-                    </View>
-                    <Button
-                        large
-                        icon={{ name: 'envira', type: 'font-awesome' }}
-                        title={!this.state.Id === true ? 'Thêm Mới' : 'Sửa Lại'}
-                        onPress={() => this.confirmAddNewUpdate()}
-                        // style={{ paddingTop: 40, }}
-                        disabled={this.state.Name === ''}
-                        buttonStyle={{ backgroundColor: 'green' }}
-                        containerViewStyle={{ paddingTop: 40 }}
+                <KeyboardAvoidingView  behavior="padding" enabled={Platform.OS === 'ios' ? false : true}
+                    style={{ flex: 1, justifyContent: 'space-between' }}>
+                    <View style={styles.contanir} onPress={Keyboard.dismiss}>
+                        <View>
+                            <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
+                            <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
+                                multiline={true} value={this.state.Name} />
+                            <FormValidationMessage>Tên hàng phải nhập</FormValidationMessage>
+                        </View>
+                        <View style={{ paddingTop: 20 }}>
+                            <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
+                            <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
+                                multiline={true} value={this.state.Description} />
+                        </View>
+                        <Button
+                            large
+                            icon={{ name: 'envira', type: 'font-awesome' }}
+                            title={!this.state.Id === true ? 'Thêm Mới' : 'Sửa Lại'}
+                            onPress={() => this.confirmAddNewUpdate()}
+                            // style={{ paddingTop: 40, }}
+                            disabled={this.state.Name === ''}
+                            buttonStyle={{ backgroundColor: 'green' }}
+                            containerViewStyle={{ paddingTop: 40 }}
 
-                    />
-                    <Button
-                        large
-                        icon={{ name: 'refresh', type: 'font-awesome' }}
-                        title='Làm Mới'
-                        onPress={this.confirmReset.bind(this)}
-                        containerViewStyle={{ paddingTop: 40 }}
-                    />
-                </View>
+                        />
+                        <Button
+                            large
+                            icon={{ name: 'refresh', type: 'font-awesome' }}
+                            title='Làm Mới'
+                            onPress={this.confirmReset.bind(this)}
+                            containerViewStyle={{ paddingTop: 40 }}
+                        />
+                    </View>
+                </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
         );
     }

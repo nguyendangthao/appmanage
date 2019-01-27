@@ -164,14 +164,14 @@ class ProductHome extends React.Component {
     changePrice(Price) {
         this.setState({ Price: Price });
     }
+    
     render() {
         return (
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
 
                 <ScrollView>
-                    <KeyboardAvoidingView style={styles.container} behavior="padding" enabled={true}
-                        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} style={{ flex: 1, justifyContent: 'space-between' }}>
-
+                    <KeyboardAvoidingView  behavior="padding" enabled={Platform.OS === 'ios' ? false : true}
+                        style={{ flex: 1, justifyContent: 'space-between' }}>
                         <View style={styles.contanir} onPress={Keyboard.dismiss}>
                             <FormLabel labelStyle={styles.labelStyle}>Loại Hàng</FormLabel>
                             <Dropdown

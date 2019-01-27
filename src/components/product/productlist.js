@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     Text, View, StyleSheet, Alert,
-    ScrollView, RefreshControl, FlatList, ActivityIndicator
+    ScrollView, RefreshControl, FlatList, ActivityIndicator, Platform
 } from 'react-native';
 import { List } from 'react-native-elements';
 import api from '../../data';
@@ -115,7 +115,17 @@ class ProductList extends React.Component {
         )
     }
     renderPrice(item) {
-        return parseInt(item).toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        if (Platform.OS === 'ios')
+            return parseInt(item).toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        else
+            return parseInt(item).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' đ';
+    }
+
+    renderMoney(item) {
+        if (Platform.OS === 'ios')
+            return parseInt(item.Price * item.Quantity).toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
+        else
+            return parseInt(item.Price * item.Quantity).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' đ';
     }
     render() {
         return (
@@ -160,8 +170,8 @@ class ProductList extends React.Component {
                                                     {!item.DateUpdate === false ? Const.formatDate('read', item.DateUpdate) + '-S' : Const.formatDate('read', item.DateCreat) + '-M'}
                                                 </Text>
                                             </View>
-                                            <Text style={{ flex: 1, paddingLeft: 5 }}>Số Lượng: {item.Quantity}. --- Giá: {this.renderPrice(item.Price)}.</Text>
-
+                                            <Text style={{paddingLeft: 5 }}>Số Lượng: {item.Quantity}. --- Giá: {this.renderPrice(item.Price)}.</Text>
+                                            <Text style={{ paddingLeft: 5 }}>Tiền: {this.renderMoney(item)}.</Text>
                                         </View>
                                     </Swipeout>
                             }
