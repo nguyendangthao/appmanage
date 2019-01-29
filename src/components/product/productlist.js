@@ -30,7 +30,7 @@ class ProductList extends React.Component {
                 onPress={() => {
                     navigation.navigate('productHome');
                 }}
-            >Sản Phẩm</Text>),
+            >Sản Phẩm</Text>)
         }
     };
     componentWillMount() {

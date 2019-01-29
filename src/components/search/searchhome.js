@@ -137,12 +137,12 @@ class SearchHome extends React.Component {
                             <View>
                                 <FormLabel labelStyle={styles.labelStyle}>Tên</FormLabel>
                                 <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
-                                    multiline={true} value={this.state.Name} />
+                                    multiline={true} value={this.state.Name} placeholder=' tên...' />
                             </View>
                             <View style={{ paddingTop: 20 }}>
                                 <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
                                 <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
-                                    multiline={true} value={this.state.Description} />
+                                    multiline={true} value={this.state.Description} placeholder=' ghi chú...'/>
                             </View>
                             <View style={{ flex: 1, flexDirection: 'row', paddingTop: 20, paddingLeft: 20, paddingRight: 20 }}>
                                 <Text style={[styles.labelStyle, { flex: 0.4, fontWeight: 'bold' }]} >Từ Ngày</Text>
@@ -174,7 +174,7 @@ class SearchHome extends React.Component {
                                 />
                             </View>
                             {
-                                !this.state.DateFrom === false &&
+                                !!this.state.DateFrom &&
                                 <View style={{ paddingTop: 20, paddingLeft: 20, paddingRight: 20 }}>
                                     <View style={{ flex: 1, flexDirection: 'row', }}>
                                         <Text style={[styles.labelStyle, { flex: 0.4, fontWeight: 'bold' }]} >Đến Ngày</Text>

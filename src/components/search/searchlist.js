@@ -108,7 +108,7 @@ class SearchList extends React.Component {
             return resuft.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' đ';
     }
     renderPrice(item) {
-        if (Platform.OS !== 'ios')
+        if (Platform.OS === 'ios')
             return parseInt(item).toLocaleString('it-IT', { style: 'currency', currency: 'VND' });
         else
             return parseInt(item).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + ' đ';

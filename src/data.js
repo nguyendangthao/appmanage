@@ -47,7 +47,7 @@ class API {
                         [model.Name, model.Description, 0, model.DateCreat, model.DateUpdate], function (tx, res) {
                             if (res.insertId)
                                 resolve(res.insertId);
-
+                                
                         });
                 },
 

@@ -113,20 +113,19 @@ class CategoryHome extends React.Component {
                         <View>
                             <FormLabel labelStyle={styles.labelStyle}>Tên Hàng</FormLabel>
                             <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
-                                multiline={true} value={this.state.Name} />
+                                multiline={true} value={this.state.Name}  placeholder=' tên...' />
                             <FormValidationMessage>Tên hàng phải nhập</FormValidationMessage>
                         </View>
                         <View style={{ paddingTop: 20 }}>
                             <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
                             <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
-                                multiline={true} value={this.state.Description} />
+                                multiline={true} value={this.state.Description}  placeholder=' ghi chú...'/>
                         </View>
                         <Button
                             large
                             icon={{ name: 'envira', type: 'font-awesome' }}
                             title={!this.state.Id === true ? 'Thêm Mới' : 'Sửa Lại'}
                             onPress={() => this.confirmAddNewUpdate()}
-                            // style={{ paddingTop: 40, }}
                             disabled={this.state.Name === ''}
                             buttonStyle={{ backgroundColor: 'green' }}
                             containerViewStyle={{ paddingTop: 40 }}

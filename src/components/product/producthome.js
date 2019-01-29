@@ -189,25 +189,25 @@ class ProductHome extends React.Component {
                             <View style={{ paddingTop: 10 }}>
                                 <FormLabel labelStyle={styles.labelStyle}>Tên Sản Phẩm</FormLabel>
                                 <FormInput onChangeText={(Name) => this.setState({ Name })} inputStyle={styles.inputStyle}
-                                    multiline={true} value={this.state.Name} />
+                                    multiline={true} value={this.state.Name} placeholder=' tên...'/>
                                 <FormValidationMessage>Tên sản phẩm phải nhập</FormValidationMessage>
                             </View>
                             <View style={{ paddingTop: 10 }}>
                                 <FormLabel labelStyle={styles.labelStyle}>Số Lượng</FormLabel>
                                 <FormInput onChangeText={(Quantity) => this.setState({ Quantity })} inputStyle={styles.inputStyle}
-                                    multiline={true} value={this.state.Quantity} keyboardType='numeric' />
+                                    multiline={true} value={this.state.Quantity} keyboardType='numeric'  placeholder=' số lượng...'/>
                                 <FormValidationMessage>Số lượng phải nhâp</FormValidationMessage>
                             </View>
                             <View style={{ paddingTop: 10 }}>
                                 <FormLabel labelStyle={styles.labelStyle}>Giá</FormLabel>
                                 <FormInput onChangeText={(Price) => this.changePrice(Price)} inputStyle={styles.inputStyle}
-                                    multiline={true} value={this.state.Price} keyboardType='numeric' />
+                                    multiline={true} value={this.state.Price} keyboardType='numeric' placeholder=' giá...'/>
                                 <FormValidationMessage>Giá phải nhập</FormValidationMessage>
                             </View>
                             <View style={{ paddingTop: 10 }}>
                                 <FormLabel labelStyle={styles.labelStyle}>Ghi Chú</FormLabel>
                                 <FormInput onChangeText={(Description) => this.setState({ Description })} inputStyle={styles.inputStyle}
-                                    multiline={true} value={this.state.Description} />
+                                    multiline={true} value={this.state.Description}  placeholder=' ghi chú...'/>
                             </View>
                             <Button
                                 large
@@ -234,7 +234,6 @@ class ProductHome extends React.Component {
                                 icon={{ name: 'refresh', type: 'font-awesome' }}
                                 title='Làm Mới'
                                 onPress={this.confirmReset.bind(this)}
-                                // style={{ paddingTop: 40, paddingBottom: 40 }}
                                 containerViewStyle={{ paddingTop: 40, paddingBottom: 40 }}
                             />
 
